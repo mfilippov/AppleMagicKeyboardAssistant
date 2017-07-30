@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Drawing;
+using System.Windows.Forms;
 
 namespace AppleMagicKeyboardAssistant
 {
@@ -6,13 +7,23 @@ namespace AppleMagicKeyboardAssistant
     {
         public static void Main()
         {
-            using (var brightnessController = new BrightnessController())
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            var contextMenu = new ContextMenu();
+            contextMenu.MenuItems.Add("E&xit", (sender, args) => Application.Exit());
+            using (var ni = new NotifyIcon())
             {
-                using (var fnKeyController = new FnKeyController())
+                ni.Icon = new Icon(typeof(Program), "icon.ico");
+                ni.ContextMenu = contextMenu;
+                ni.Visible = true;
+                using (var brightnessController = new BrightnessController())
                 {
-                    using (new KeyboardHook(fnKeyController, brightnessController))
+                    using (var fnKeyController = new FnKeyController())
                     {
-                        Application.Run();
+                        using (new KeyboardHook(fnKeyController, brightnessController))
+                        {
+                            Application.Run();
+                        }
                     }
                 }
             }

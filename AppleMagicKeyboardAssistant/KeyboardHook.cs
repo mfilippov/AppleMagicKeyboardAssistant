@@ -65,6 +65,7 @@ namespace AppleMagicKeyboardAssistant
                 && wParam != WM_SYSKEYDOWN
                 && wParam != WM_KEYUP)
                 return User32.CallNextHookEx(_hookId, nCode, wParam, lParam);
+
             var kbd = (KBDLLHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
             if (nCode != 0)
                 return User32.CallNextHookEx(_hookId, nCode, wParam, lParam);
