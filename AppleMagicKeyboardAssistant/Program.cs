@@ -1,10 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace AppleMagicKeyboardAssistant
 {
-    internal class Program
+    public class Program
     {
+        [STAThread]
         public static void Main()
         {
             Application.EnableVisualStyles();
