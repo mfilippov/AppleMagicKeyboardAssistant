@@ -1,5 +1,5 @@
 ﻿using System.ServiceProcess;
-using System.Windows.Forms;
+using System.Threading;
 
 namespace AppleMagicKeyboardAssistant
 {
@@ -7,37 +7,45 @@ namespace AppleMagicKeyboardAssistant
     {
         public static void Main()
         {
-            ServiceBase.Run(new AppleMagicKeyboardAssitant());
+            ServiceBase.Run(new AppleMagicKeyboardAssitantService());
         }
     }
 
-    public class AppleMagicKeyboardAssitant : ServiceBase
+    public class AppleMagicKeyboardAssitantService : ServiceBase
     {
-        public AppleMagicKeyboardAssitant()
+        private Thread _serviceThread;
+        private ManualResetEvent _waiter;
+        
+        public AppleMagicKeyboardAssitantService()
         {
             ServiceName = "AppleMagicKeyboardAssitant";
             CanStop = true;
-            CanPauseAndContinue = true;
+            CanPauseAndContinue = false;
             AutoLog = true;
         }
 
         protected override void OnStart(string[] args)
         {
-            using (var brightnessController = new BrightnessController())
+            _waiter = new ManualResetEvent(false); 
+            _serviceThread = new Thread(() =>
             {
-                using (var fnKeyController = new FnKeyController())
+                using (var brightnessController = new BrightnessController())
                 {
-                    using (new KeyboardHook(fnKeyController, brightnessController))
+                    using (var fnKeyController = new FnKeyController())
                     {
-                        Application.Run();
+                        using (new KeyboardHook(fnKeyController, brightnessController))
+                        {
+                            _waiter.WaitOne();
+                        }
                     }
                 }
-            }
+            });
+            _serviceThread.Start();
         }
 
         protected override void OnStop()
         {
-            Application.Exit();
+            _waiter.Set();
         }
     }
 }
