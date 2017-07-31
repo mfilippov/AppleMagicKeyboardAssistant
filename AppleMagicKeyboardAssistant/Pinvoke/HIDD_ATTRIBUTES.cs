@@ -10,8 +10,8 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
     internal struct HIDD_ATTRIBUTES
     {
         public Int32 Size;
-        public Int16 VendorID;
-        public Int16 ProductID;
-        public Int16 VersionNumber;
+        public UInt16 VendorID;
+        public UInt16 ProductID;
+        public UInt16 VersionNumber;
     }
 }

@@ -4,12 +4,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using AppleMagicKeyboardAssistant.Pinvoke;
 using Microsoft.Win32.SafeHandles;
+// ReSharper disable BuiltInTypeReferenceStyle
 
 namespace AppleMagicKeyboardAssistant
 {
     public class FnKeyController : IDisposable
     {
-        private readonly List<short> _appleProductList = new List<short> {570};
+        private readonly List<UInt16> _appleVendorList = new List<UInt16>{ 0x05ac, 0x046d };
+        private readonly List<UInt16> _appleProductList = new List<UInt16> { 0x23a, 0xc31c };
         private readonly FileStream _deviceFsStream;
         private readonly IntPtr _deviceHandle = IntPtr.Zero;
         private readonly short _inputBufferLength;
@@ -46,7 +48,7 @@ namespace AppleMagicKeyboardAssistant
                     IntPtr.Zero, Constants.OPEN_EXISTING, Constants.FILE_FLAG_OVERLAPPED, IntPtr.Zero);
                 var hidAttributes = new HIDD_ATTRIBUTES();
                 Hid.HidD_GetAttributes(handle, ref hidAttributes);
-                if (hidAttributes.VendorID == Constants.VID_APPLE
+                if (_appleVendorList.Contains(hidAttributes.VendorID)
                     && _appleProductList.Contains(hidAttributes.ProductID))
                 {
                     if (_deviceHandle != null)
