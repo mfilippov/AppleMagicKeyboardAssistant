@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace AppleMagicKeyboardAssistant
@@ -14,6 +15,11 @@ namespace AppleMagicKeyboardAssistant
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Application.ThreadException += (sender, args) =>
+                {
+                    File.AppendAllText("app.log", args.Exception.Message);
+                    File.AppendAllText("app.log", args.Exception.StackTrace);
+                };
                 var contextMenu = new ContextMenu();
                 contextMenu.MenuItems.Add("E&xit", (sender, args) => Application.Exit());
                 using (var ni = new NotifyIcon())
@@ -27,9 +33,7 @@ namespace AppleMagicKeyboardAssistant
                         {
                             using (new KeyboardHook(fnKeyController, brightnessController))
                             {
-                                
-                                    Application.Run();
-                                
+                                Application.Run();
                             }
                         }
                     }
@@ -37,8 +41,8 @@ namespace AppleMagicKeyboardAssistant
             }
             catch (Exception ex)
             {
-                File.AppendAllText("Crash.log", ex.Message);
-                File.AppendAllText("Crash.log", ex.StackTrace);
+                File.AppendAllText("app.log", ex.Message);
+                File.AppendAllText("app.log", ex.StackTrace);
             }
         }
     }

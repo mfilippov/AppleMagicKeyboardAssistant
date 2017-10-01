@@ -69,7 +69,7 @@ namespace AppleMagicKeyboardAssistant
             var kbd = (KBDLLHOOKSTRUCT) Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
             if (nCode != 0)
                 return User32.CallNextHookEx(_hookId, nCode, wParam, lParam);
-            if (wParam != WM_KEYDOWN && wParam != WM_SYSKEYDOWN)
+            if ((kbd.flags & KBDLLHOOKSTRUCTFlags.LlkhfInjected) == KBDLLHOOKSTRUCTFlags.LlkhfInjected)
                 return User32.CallNextHookEx(_hookId, nCode, wParam, lParam);
             var intercept = HandleKeyPressedEvent(kbd);
             return intercept ? _interceptResult : User32.CallNextHookEx(_hookId, nCode, wParam, lParam);
@@ -92,17 +92,17 @@ namespace AppleMagicKeyboardAssistant
                 case Keys.RMenu:
                     return false;
                 case Keys.Left:
-                    return SendKey(Keys.Home);
+                    return SendKey(Keys.Home, keyHook);
                 case Keys.Right:
-                    return SendKey(Keys.End);
+                    return SendKey(Keys.End, keyHook);
                 case Keys.Up:
-                    return SendKey(Keys.PageUp);
+                    return SendKey(Keys.PageUp, keyHook);
                 case Keys.Down:
-                    return SendKey(Keys.PageDown);
+                    return SendKey(Keys.PageDown, keyHook);
                 case Keys.Back:
-                    return SendKey(Keys.Delete);
+                    return SendKey(Keys.Delete, keyHook);
                 case Keys.Enter:
-                    return SendKey(Keys.Insert);
+                    return SendKey(Keys.Insert, keyHook);
                 case Keys.F1:
                     return Bright(-10);
                 case Keys.F2:
@@ -140,11 +140,11 @@ namespace AppleMagicKeyboardAssistant
             return true;
         }
 
-        private bool SendKey(Keys key)
+        private bool SendKey(Keys key, KBDLLHOOKSTRUCT keyHook)
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
-            var inputs = new INPUT[2];
+            var inputs = new INPUT[1];
             inputs[0] = new INPUT
             {
                 Type = INPUT_TYPE.INPUT_KEYBOARD,
@@ -154,23 +154,13 @@ namespace AppleMagicKeyboardAssistant
                         new KEYBDINPUT
                         {
                             KeyCode = (UInt16) key,
-                            ExtraInfo = _extraInfo
+                            ExtraInfo = keyHook.dwExtraInfo,
+                            Flags = (uint)keyHook.flags,
+                            Time = keyHook.time
                         }
                 }
             };
-            inputs[1] = new INPUT
-            {
-                Type = INPUT_TYPE.INPUT_KEYBOARD,
-                Data =
-                {
-                    Keyboard = new KEYBDINPUT
-                    {
-                        KeyCode = (UInt16) key,
-                        Flags = KEYEVENTF_KEYUP,
-                        ExtraInfo = _extraInfo
-                    }
-                }
-            };
+
             User32.SendInput((uint) inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
             return true;
         }
