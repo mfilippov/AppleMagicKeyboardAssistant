@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace AppleMagicKeyboardAssistant
@@ -9,25 +10,35 @@ namespace AppleMagicKeyboardAssistant
         [STAThread]
         public static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            var contextMenu = new ContextMenu();
-            contextMenu.MenuItems.Add("E&xit", (sender, args) => Application.Exit());
-            using (var ni = new NotifyIcon())
+            try
             {
-                ni.Icon = new Icon(typeof(Program), "icon.ico");
-                ni.ContextMenu = contextMenu;
-                ni.Visible = true;
-                using (var brightnessController = new BrightnessController())
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                var contextMenu = new ContextMenu();
+                contextMenu.MenuItems.Add("E&xit", (sender, args) => Application.Exit());
+                using (var ni = new NotifyIcon())
                 {
-                    using (var fnKeyController = new FnKeyController())
+                    ni.Icon = new Icon(typeof(Program), "icon.ico");
+                    ni.ContextMenu = contextMenu;
+                    ni.Visible = true;
+                    using (var brightnessController = new BrightnessController())
                     {
-                        using (new KeyboardHook(fnKeyController, brightnessController))
+                        using (var fnKeyController = new FnKeyController())
                         {
-                            Application.Run();
+                            using (new KeyboardHook(fnKeyController, brightnessController))
+                            {
+                                
+                                    Application.Run();
+                                
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText("Crash.log", ex.Message);
+                File.AppendAllText("Crash.log", ex.StackTrace);
             }
         }
     }
