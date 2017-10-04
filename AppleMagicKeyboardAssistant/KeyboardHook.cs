@@ -100,25 +100,25 @@ namespace AppleMagicKeyboardAssistant
                 case Keys.Down:
                     return SendKey(Keys.PageDown, keyHook);
                 case Keys.Back:
-                    return SendKey(Keys.Delete, keyHook);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendKey(Keys.Delete, keyHook);
                 case Keys.Enter:
-                    return SendKey(Keys.Insert, keyHook);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendKey(Keys.Insert, keyHook);
                 case Keys.F1:
-                    return Bright(-10);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && Bright(-10);
                 case Keys.F2:
-                    return Bright(10);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && Bright(10);
                 case Keys.F7:
-                    return SendCommand(APPCOMMAND_MEDIA_PREVIOUSTRACK);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_MEDIA_PREVIOUSTRACK);
                 case Keys.F8:
-                    return SendCommand(APPCOMMAND_MEDIA_PLAY_PAUSE);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_MEDIA_PLAY_PAUSE);
                 case Keys.F9:
-                    return SendCommand(APPCOMMAND_MEDIA_NEXTTRACK);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_MEDIA_NEXTTRACK);
                 case Keys.F10:
-                    return SendCommand(APPCOMMAND_VOLUME_MUTE);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_VOLUME_MUTE);
                 case Keys.F11:
-                    return SendCommand(APPCOMMAND_VOLUME_DOWN);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_VOLUME_DOWN);
                 case Keys.F12:
-                    return SendCommand(APPCOMMAND_VOLUME_UP);
+                    return (keyHook.flags & KBDLLHOOKSTRUCTFlags.LlkhfUp) != KBDLLHOOKSTRUCTFlags.LlkhfUp && SendCommand(APPCOMMAND_VOLUME_UP);
                 default:
                     return false;
             }
