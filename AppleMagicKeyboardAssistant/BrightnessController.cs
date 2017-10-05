@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppleMagicKeyboardAssistant.Pinvoke;
+using Serilog.Core;
 
 namespace AppleMagicKeyboardAssistant
 {
     public class BrightnessController : IDisposable
     {
+        private readonly Logger _logger;
         private readonly List<PHYSICAL_MONITOR[]> _physicalMonitors = new List<PHYSICAL_MONITOR[]>();
 
-        public BrightnessController()
+        public BrightnessController(Logger logger)
         {
+            _logger = logger;
             var monitorHandles = new List<IntPtr>();
             User32.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
                 (IntPtr monitor, IntPtr hdcMonitor, ref RECT rect, IntPtr data) =>
@@ -55,6 +58,8 @@ namespace AppleMagicKeyboardAssistant
                     newValue = minBritness;
                 if (newValue > maxBritness)
                     newValue = maxBritness;
+                _logger.Debug("ChangeBritness {currentBritness}, {minBritness}, {maxBritness}, {newValue}",
+                    currentBritness, maxBritness, maxBritness, newValue);
                 Dxva2.SetMonitorBrightness(monitor.hPhysicalMonitor, (uint) newValue);
             }
         }

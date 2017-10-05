@@ -1,9 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AppleMagicKeyboardAssistant.Pinvoke;
+using Serilog;
+using Serilog.Core;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable InconsistentNaming
@@ -19,9 +23,8 @@ namespace AppleMagicKeyboardAssistant
         private readonly BrightnessController _brightnessController;
         private readonly UIntPtr _extraInfo = (UIntPtr) 0x37564;
         private readonly FnKeyController _fnKeyController;
-
         private readonly IntPtr _handle = Process.GetProcessesByName("explorer").First().MainWindowHandle;
-
+        private readonly ILogger _logger;
         private readonly IntPtr _hookId;
         private readonly IntPtr _interceptResult = (IntPtr) 1;
         private readonly IntPtr APPCOMMAND_MEDIA_NEXTTRACK = (IntPtr) 0xb0000;
@@ -34,11 +37,12 @@ namespace AppleMagicKeyboardAssistant
         private readonly IntPtr WM_KEYUP = (IntPtr) 0x0101;
         private readonly IntPtr WM_SYSKEYDOWN = (IntPtr) 0x0104;
 
-        public KeyboardHook(FnKeyController fnKeyController, BrightnessController brightnessController)
+        public KeyboardHook(FnKeyController fnKeyController, BrightnessController brightnessController, Logger logger)
         {
             _fnKeyController = fnKeyController;
             _brightnessController = brightnessController;
             _hookId = SetHook(Callback);
+            _logger = logger;
         }
 
         public void Dispose()
@@ -144,6 +148,7 @@ namespace AppleMagicKeyboardAssistant
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
+            File.AppendAllText("app.log", $"Send overritten key: {key}");
             var inputs = new INPUT[1];
             inputs[0] = new INPUT
             {

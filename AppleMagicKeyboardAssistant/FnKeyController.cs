@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using AppleMagicKeyboardAssistant.Pinvoke;
 using Microsoft.Win32.SafeHandles;
+using Serilog.Core;
+using Constants = AppleMagicKeyboardAssistant.Pinvoke.Constants;
+
 // ReSharper disable BuiltInTypeReferenceStyle
 
 namespace AppleMagicKeyboardAssistant
 {
     public class FnKeyController : IDisposable
     {
+        private readonly Logger _logger;
         private readonly List<UInt16> _appleVendorList = new List<UInt16>{ 0x05ac, 0x046d };
         private readonly List<UInt16> _appleProductList = new List<UInt16> { 0x23a, 0xc31c };
         private readonly FileStream _deviceFsStream;
@@ -19,8 +24,9 @@ namespace AppleMagicKeyboardAssistant
 
         private volatile bool _isFnKeyPressed;
 
-        public FnKeyController()
+        public FnKeyController(Logger logger)
         {
+            _logger = logger;
             Guid hidGuid;
             var spDeviceInterfaceData = new SP_DEVICE_INTERFACE_DATA();
             spDeviceInterfaceData.CbSize = Marshal.SizeOf(spDeviceInterfaceData);
@@ -91,7 +97,15 @@ namespace AppleMagicKeyboardAssistant
         private void BeginAsyncRead()
         {
             var arrInputReport = new byte[_inputBufferLength];
-            _deviceFsStream.BeginRead(arrInputReport, 0, _inputBufferLength, ReadCompleted, arrInputReport);
+            try
+            {
+                _deviceFsStream.BeginRead(arrInputReport, 0, _inputBufferLength, ReadCompleted, arrInputReport);
+            }
+            catch (Exception ex)
+            {
+                _logger.Fatal(ex, "ReadCompleted exception");
+                Application.Exit();
+            }
         }
 
         private void ReadCompleted(IAsyncResult ar)
@@ -100,6 +114,10 @@ namespace AppleMagicKeyboardAssistant
             try
             {
                 HandleKeyEvent(eventBuffer);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "ReadCompleted exception");
             }
             finally
             {
@@ -113,6 +131,8 @@ namespace AppleMagicKeyboardAssistant
                 return;
             _isFnKeyPressed = (eventBuffer[1] & 16) == 16;
             _isEjectKeyPressed = (eventBuffer[1] & 8) == 8;
+            _logger.Debug("Mac special keys state changed: {_isFnKeyPressed}, {_isEjectKeyPressed}",
+                _isFnKeyPressed, _isEjectKeyPressed);
         }
     }
 }
