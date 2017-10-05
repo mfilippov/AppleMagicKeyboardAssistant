@@ -16,7 +16,7 @@ namespace AppleMagicKeyboardAssistant
         {
             try
             {
-                var basePath = Assembly.GetExecutingAssembly().Location;
+                var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 if (basePath == null)
                     return;
                 var logger = new LoggerConfiguration()
