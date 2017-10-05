@@ -14,15 +14,14 @@ namespace AppleMagicKeyboardAssistant
         [STAThread]
         public static void Main()
         {
+            var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (basePath == null)
+                return;
+            var logger = new LoggerConfiguration()
+                .WriteTo.File(Path.Combine(basePath, "app.log"), fileSizeLimitBytes: 10240)
+                .CreateLogger();
             try
             {
-                var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                if (basePath == null)
-                    return;
-                var logger = new LoggerConfiguration()
-                    .WriteTo.File(Path.Combine(basePath, "app.log"), fileSizeLimitBytes: 10240)
-                    .CreateLogger();
-                logger.Information("Application started");
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.ThreadException += (sender, args) =>
@@ -44,7 +43,9 @@ namespace AppleMagicKeyboardAssistant
                             {
                                 try
                                 {
+                                    logger.Information("Application started");
                                     Application.Run();
+                                    logger.Information("Application exiting");
                                 }
                                 catch (Exception ex)
                                 {
@@ -57,8 +58,7 @@ namespace AppleMagicKeyboardAssistant
             }
             catch (Exception ex)
             {
-                File.AppendAllText("app.log", ex.Message);
-                File.AppendAllText("app.log", ex.StackTrace);
+                logger.Fatal(ex, "Unhandled error");
             }
         }
     }

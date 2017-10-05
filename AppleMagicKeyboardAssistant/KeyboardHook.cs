@@ -148,7 +148,7 @@ namespace AppleMagicKeyboardAssistant
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
-            File.AppendAllText("app.log", $"Send overritten key: {key}");
+            _logger.Debug("Send overritten key: {key}, {keyHook}", key, keyHook);
             var inputs = new INPUT[1];
             inputs[0] = new INPUT
             {
