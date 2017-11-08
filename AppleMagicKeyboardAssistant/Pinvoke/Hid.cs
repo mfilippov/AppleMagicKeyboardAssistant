@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AppleMagicKeyboardAssistant.Pinvoke
 {
@@ -19,5 +20,8 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
 
         [DllImport("hid.dll", SetLastError = true)]
         public static extern bool HidD_FreePreparsedData(ref IntPtr pData);
+
+        [DllImport("hid.dll", CharSet=CharSet.Auto, SetLastError=true)]
+        public static extern bool HidD_GetProductString(IntPtr deviceObject, StringBuilder buffer, Int32 bufferLength);
     }
 }

@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace AppleMagicKeyboardAssistant.Pinvoke
 {
-    internal class Kernel32
+    internal unsafe class Kernel32
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
@@ -23,8 +23,7 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
         [SuppressUnmanagedCodeSecurity]
         public static extern bool CloseHandle(IntPtr hObject);
 
-        [DllImport("kernel32.dll")]
-        public static extern bool ReadFileScatter(IntPtr hFile, FILE_SEGMENT_ELEMENT[]
-            segementArray, uint numberOfBytesToRead, IntPtr lpReserved, [In] ref NativeOverlapped lpOverlapped);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true, ExactSpelling = true)]
+        public static extern Int32 ReadFile(void* hFile, void* lpBuffer, UInt32 nNumberOfBytesToRead, UInt32* lpNumberOfBytesRead, ref NativeOverlapped lpOverlapped);
     }
 }
