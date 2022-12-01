@@ -6,12 +6,12 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
     internal static class Dxva2
     {
         [DllImport("dxva2.dll")]
-        public static extern bool GetNumberOfPhysicalMonitorsFromHMONITOR(IntPtr hMonitor,
+        public static extern bool GetNumberOfPhysicalMonitorsFromHMONITOR(nint hMonitor,
             ref uint pdwNumberOfPhysicalMonitors);
 
         [DllImport("dxva2.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetPhysicalMonitorsFromHMONITOR(IntPtr hMonitor, uint dwPhysicalMonitorArraySize,
+        public static extern bool GetPhysicalMonitorsFromHMONITOR(nint hMonitor, uint dwPhysicalMonitorArraySize,
             [Out] PHYSICAL_MONITOR[] pPhysicalMonitorArray);
 
         [DllImport("dxva2.dll")]
@@ -21,11 +21,11 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
 
         [DllImport("dxva2.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetMonitorBrightness(IntPtr handle, ref uint minimumBrightness,
+        public static extern bool GetMonitorBrightness(nint handle, ref uint minimumBrightness,
             ref uint currentBrightness, ref uint maxBrightness);
 
         [DllImport("dxva2.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetMonitorBrightness(IntPtr handle, uint newBrightness);
+        public static extern bool SetMonitorBrightness(nint handle, uint newBrightness);
     }
 }

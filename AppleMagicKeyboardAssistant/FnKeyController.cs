@@ -1,49 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
-using AppleMagicKeyboardAssistant.Pinvoke;
+﻿using System.Diagnostics;
 using Microsoft.Win32.SafeHandles;
-using Serilog.Core;
-
-// ReSharper disable BuiltInTypeReferenceStyle
 
 namespace AppleMagicKeyboardAssistant
 {
-    public unsafe class FnKeyController : IDisposable
+    public class FnKeyController : IDisposable
     {
-        private readonly Logger _logger;
-        private readonly FileStream _deviceFsStream;
-        private readonly AppleDevice _device;
+        private readonly FileStream? _deviceFsStream;
+        private readonly AppleDevice? _device;
         private volatile bool _isEjectKeyPressed;
 
         private volatile bool _isFnKeyPressed;
+        private volatile bool _isKeyboardDeviceFound;
 
-        public FnKeyController(Logger logger)
+        public FnKeyController()
         {
-            _logger = logger;
             var devices = UsbDeviceManager.EnumerateAppleDevices();
             for (var i = 0; i < devices.Count - 1; i++)
             {
                 devices[i].Dispose();
             }
-            _device = devices[devices.Count - 1];
+
+            if (devices.Count == 0)
+            {
+                const string errorMessage = "Apple keyboard not found";
+                Trace.WriteLine(errorMessage, "AppleMagicKeyboardAssistant");
+                MessageBox.Show(errorMessage, "Fatal error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _isKeyboardDeviceFound = false;
+                return;
+            }
+
+            _device = devices[^1];
             _deviceFsStream = new FileStream(
                 new SafeFileHandle(_device.Handle, true), FileAccess.Read, _device.BufferSize, true);
             BeginAsyncRead();
         }
+
+        public bool IsKeyboardDeviceFound => _isKeyboardDeviceFound;
 
         public bool IsFnKeyPressed => _isFnKeyPressed;
         public bool IsEjectKeyPressed => _isEjectKeyPressed;
 
         public void Dispose()
         {
-            _device.Dispose();
+            if (_device != null)
+            {
+                _device.Dispose();
+            }
         }
 
         private void BeginAsyncRead()
         {
+            if (_device == null || _deviceFsStream == null)
+            {
+                return;
+            }
             var arrInputReport = new byte[_device.BufferSize];
             try
             {
@@ -51,7 +61,7 @@ namespace AppleMagicKeyboardAssistant
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "ReadCompleted exception");
+                Trace.WriteLine($"ReadCompleted exception: {ex}", "AppleMagicKeyboardAssistant");
                 Application.Exit();
             }
         }
@@ -61,11 +71,14 @@ namespace AppleMagicKeyboardAssistant
             var eventBuffer = ar.AsyncState as byte[];
             try
             {
-                HandleKeyEvent(eventBuffer);
+                if (eventBuffer != null)
+                {
+                    HandleKeyEvent(eventBuffer);
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ReadCompleted exception");
+                Trace.WriteLine($"ReadCompleted exception: {ex}", "AppleMagicKeyboardAssistant");
             }
             finally
             {
@@ -79,8 +92,7 @@ namespace AppleMagicKeyboardAssistant
                 return;
             _isFnKeyPressed = (eventBuffer[1] & 16) == 16;
             _isEjectKeyPressed = (eventBuffer[1] & 8) == 8;
-            _logger.Debug("Mac special keys state changed: {_isFnKeyPressed}, {_isEjectKeyPressed}",
-                _isFnKeyPressed, _isEjectKeyPressed);
+            Trace.WriteLine($"Mac special keys state changed: {_isFnKeyPressed}, {_isEjectKeyPressed}");
         }
     }
 }

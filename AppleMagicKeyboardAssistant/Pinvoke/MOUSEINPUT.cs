@@ -12,6 +12,6 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
         public UInt32 MouseData;
         public UInt32 Flags;
         public UInt32 Time;
-        public IntPtr ExtraInfo;
+        public nint ExtraInfo;
     }
 }

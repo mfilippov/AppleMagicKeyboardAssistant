@@ -6,35 +6,35 @@ namespace AppleMagicKeyboardAssistant
 {
     public class AppleDevice: IDisposable
     {
-        public IntPtr Handle { get; }
+        public nint Handle { get; }
         public ushort VendorId { get; }
         public ushort ProcuctId { get; }
         public string DevicePath { get; }
         public string ProductString { get; }
         public int BufferSize { get; }
 
-        public AppleDevice(IntPtr handle, ushort vendorId, ushort procuctId, string devicePath)
+        public AppleDevice(nint handle, ushort vendorId, ushort procuctId, string devicePath)
         {
             Handle = handle;
             VendorId = vendorId;
             ProcuctId = procuctId;
             DevicePath = devicePath;
             var sb = new StringBuilder(1024);
-            Hid.HidD_GetProductString(handle, sb, 1024);
+            Hid.GetProductString(handle, sb, 1024);
             ProductString = sb.ToString();
-            var pData = IntPtr.Zero;
+            var pData = nint.Zero;
             try
             {
-                if (!Hid.HidD_GetPreparsedData(Handle, out pData))
+                if (!Hid.GetPreparsedData(Handle, out pData))
                 {
                     throw new Exception("Invalid handle");
                 }
-                Hid.HidP_GetCaps(pData, out var hidpCaps);
+                Hid.GetCaps(pData, out var hidpCaps);
                 BufferSize = hidpCaps.InputReportByteLength;
             }
             finally
             {
-                Hid.HidD_FreePreparsedData(ref pData);
+                Hid.FreePreparsedData(ref pData);
             }
         }
 

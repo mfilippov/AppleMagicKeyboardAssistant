@@ -1,13 +1,6 @@
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using AppleMagicKeyboardAssistant.Pinvoke;
-using Serilog;
-using Serilog.Core;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable InconsistentNaming
@@ -23,26 +16,24 @@ namespace AppleMagicKeyboardAssistant
         private readonly BrightnessController _brightnessController;
         private readonly UIntPtr _extraInfo = (UIntPtr) 0x37564;
         private readonly FnKeyController _fnKeyController;
-        private readonly IntPtr _handle = Process.GetProcessesByName("explorer").First().MainWindowHandle;
-        private readonly ILogger _logger;
-        private readonly IntPtr _hookId;
-        private readonly IntPtr _interceptResult = (IntPtr) 1;
-        private readonly IntPtr APPCOMMAND_MEDIA_NEXTTRACK = (IntPtr) 0xb0000;
-        private readonly IntPtr APPCOMMAND_MEDIA_PLAY_PAUSE = (IntPtr) 0xe0000;
-        private readonly IntPtr APPCOMMAND_MEDIA_PREVIOUSTRACK = (IntPtr) 0xc0000;
-        private readonly IntPtr APPCOMMAND_VOLUME_DOWN = (IntPtr) 0x90000;
-        private readonly IntPtr APPCOMMAND_VOLUME_MUTE = (IntPtr) 0x80000;
-        private readonly IntPtr APPCOMMAND_VOLUME_UP = (IntPtr) 0xa0000;
-        private readonly IntPtr WM_KEYDOWN = (IntPtr) 0x0100;
-        private readonly IntPtr WM_KEYUP = (IntPtr) 0x0101;
-        private readonly IntPtr WM_SYSKEYDOWN = (IntPtr) 0x0104;
+        private readonly nint _handle = Process.GetProcessesByName("explorer").First().MainWindowHandle;
+        private readonly nint _hookId;
+        private readonly nint _interceptResult = (nint) 1;
+        private readonly nint APPCOMMAND_MEDIA_NEXTTRACK = (nint) 0xb0000;
+        private readonly nint APPCOMMAND_MEDIA_PLAY_PAUSE = (nint) 0xe0000;
+        private readonly nint APPCOMMAND_MEDIA_PREVIOUSTRACK = (nint) 0xc0000;
+        private readonly nint APPCOMMAND_VOLUME_DOWN = (nint) 0x90000;
+        private readonly nint APPCOMMAND_VOLUME_MUTE = (nint) 0x80000;
+        private readonly nint APPCOMMAND_VOLUME_UP = (nint) 0xa0000;
+        private readonly nint WM_KEYDOWN = (nint) 0x0100;
+        private readonly nint WM_KEYUP = (nint) 0x0101;
+        private readonly nint WM_SYSKEYDOWN = (nint) 0x0104;
 
-        public KeyboardHook(FnKeyController fnKeyController, BrightnessController brightnessController, Logger logger)
+        public KeyboardHook(FnKeyController fnKeyController, BrightnessController brightnessController)
         {
             _fnKeyController = fnKeyController;
             _brightnessController = brightnessController;
             _hookId = SetHook(Callback);
-            _logger = logger;
         }
 
         public void Dispose()
@@ -50,7 +41,7 @@ namespace AppleMagicKeyboardAssistant
             User32.UnhookWindowsHookEx(_hookId);
         }
 
-        private static IntPtr SetHook(User32.LowLevelKeyboardProc proc)
+        private static nint SetHook(User32.LowLevelKeyboardProc proc)
         {
             using (var curProcess = Process.GetCurrentProcess())
             {
@@ -62,7 +53,7 @@ namespace AppleMagicKeyboardAssistant
             }
         }
 
-        private IntPtr Callback(int nCode, IntPtr wParam, IntPtr lParam)
+        private nint Callback(int nCode, nint wParam, nint lParam)
         {
             if (nCode < 0
                 || wParam != WM_KEYDOWN
@@ -128,7 +119,7 @@ namespace AppleMagicKeyboardAssistant
             }
         }
 
-        private bool SendCommand(IntPtr command)
+        private bool SendCommand(nint command)
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
@@ -140,7 +131,7 @@ namespace AppleMagicKeyboardAssistant
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
-            _brightnessController.ChangeBritness(delta);
+            _brightnessController.ChangeBrightness(delta);
             return true;
         }
 
@@ -148,7 +139,7 @@ namespace AppleMagicKeyboardAssistant
         {
             if (!_fnKeyController.IsFnKeyPressed)
                 return false;
-            _logger.Debug("Send overritten key: {key}, {keyHook}", key, keyHook);
+            Trace.WriteLine($"Send overwritten key: {key}, {keyHook}", "AppleMagicKeyboardAssistant");
             var inputs = new INPUT[1];
             inputs[0] = new INPUT
             {

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
+﻿using System.Runtime.InteropServices;
+// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable FieldCanBeMadeReadOnly.Global
 
 namespace AppleMagicKeyboardAssistant.Pinvoke
 {
@@ -12,6 +12,6 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
         public Int32 CbSize;
         public Guid InterfaceClassGuid;
         public Int32 Flags;
-        public Int32 Reserved;
+        public UIntPtr Reserved;
     }
 }

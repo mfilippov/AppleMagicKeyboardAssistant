@@ -8,7 +8,7 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public struct PHYSICAL_MONITOR
     {
-        public IntPtr hPhysicalMonitor;
+        public nint hPhysicalMonitor;
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string szPhysicalMonitorDescription;
     }

@@ -6,22 +6,22 @@ namespace AppleMagicKeyboardAssistant.Pinvoke
 {
     internal class Hid
     {
-        [DllImport("hid.dll", SetLastError = true)]
-        public static extern void HidD_GetHidGuid(out Guid guid);
+        [DllImport("hid.dll", EntryPoint = "HidD_GetHidGuid", SetLastError = true)]
+        public static extern void GetHidGuid(out Guid guid);
 
-        [DllImport("hid.dll", SetLastError = true)]
-        public static extern bool HidD_GetAttributes(IntPtr deviceObject, ref HIDD_ATTRIBUTES attributes);
+        [DllImport("hid.dll", EntryPoint = "HidD_GetAttributes",SetLastError = true)]
+        public static extern bool GetAttributes(nint deviceObject, ref HIDD_ATTRIBUTES attributes);
 
-        [DllImport("hid.dll", SetLastError = true)]
-        public static extern bool HidD_GetPreparsedData(IntPtr hFile, out IntPtr lpData);
+        [DllImport("hid.dll", EntryPoint = "HidD_GetPreparsedData", SetLastError = true)]
+        public static extern bool GetPreparsedData(nint hFile, out nint lpData);
 
-        [DllImport("hid.dll", SetLastError = true)]
-        public static extern int HidP_GetCaps(IntPtr lpData, out HIDP_CAPS oCaps);
+        [DllImport("hid.dll", EntryPoint = "HidP_GetCaps", SetLastError = true)]
+        public static extern int GetCaps(nint lpData, out HIDP_CAPS oCaps);
 
-        [DllImport("hid.dll", SetLastError = true)]
-        public static extern bool HidD_FreePreparsedData(ref IntPtr pData);
+        [DllImport("hid.dll", EntryPoint = "HidD_FreePreparsedData", SetLastError = true)]
+        public static extern bool FreePreparsedData(ref nint pData);
 
-        [DllImport("hid.dll", CharSet=CharSet.Auto, SetLastError=true)]
-        public static extern bool HidD_GetProductString(IntPtr deviceObject, StringBuilder buffer, Int32 bufferLength);
+        [DllImport("hid.dll", EntryPoint = "HidD_GetProductString", CharSet=CharSet.Auto, SetLastError=true)]
+        public static extern bool GetProductString(nint deviceObject, StringBuilder buffer, Int32 bufferLength);
     }
 }

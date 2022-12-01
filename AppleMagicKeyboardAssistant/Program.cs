@@ -1,13 +1,7 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Reflection;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 using AppleMagicKeyboardAssistant.Pinvoke;
-using Serilog;
 
 namespace AppleMagicKeyboardAssistant
 {
@@ -30,42 +24,43 @@ namespace AppleMagicKeyboardAssistant
                 MessageBox.Show(report.ToString(), "Diagnostics report");
                 Application.Exit();
             } 
-            var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (basePath == null)
-                return;
-            var logger = new LoggerConfiguration()
-                .WriteTo.File(Path.Combine(basePath, "app.log"), fileSizeLimitBytes: 10240)
-                .CreateLogger();
             try
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.ThreadException += (sender, eventArgs) =>
                 {
-                    logger.Error(eventArgs.Exception, "");
+                    Trace.WriteLine(eventArgs.Exception, "AppleMagicKeyboardAssistant");
                 };
-                var contextMenu = new ContextMenu();
-                contextMenu.MenuItems.Add("E&xit", (sender, eventArgs) => Application.Exit());
+                var contextMenu = new ContextMenuStrip();
+                contextMenu.Items.Add("E&xit",
+                    Image.FromStream(typeof(Program).Assembly.GetManifestResourceStream("AppleMagicKeyboardAssistant.Exit.png")
+                                     ?? throw new InvalidOperationException("Can't load resource 'Exit.png'")),
+                    (_, _) => Application.Exit());
                 using (var ni = new NotifyIcon())
                 {
-                    ni.Icon = new Icon(typeof(Program), "icon.ico");
-                    ni.ContextMenu = contextMenu;
+                    ni.Icon = new Icon(typeof(Program), "App.ico");
+                    ni.ContextMenuStrip = contextMenu;
                     ni.Visible = true;
-                    using (var brightnessController = new BrightnessController(logger))
+                    using (var brightnessController = new BrightnessController())
                     {
-                        using (var fnKeyController = new FnKeyController(logger))
+                        using (var fnKeyController = new FnKeyController())
                         {
-                            using (new KeyboardHook(fnKeyController, brightnessController, logger))
+                            if (!fnKeyController.IsKeyboardDeviceFound)
+                            {
+                                return;
+                            }
+                            using (new KeyboardHook(fnKeyController, brightnessController))
                             {
                                 try
                                 {
-                                    logger.Information("Application started");
+                                    Trace.WriteLine("Application started", "AppleMagicKeyboardAssistant");
                                     Application.Run();
-                                    logger.Information("Application exiting");
+                                    Trace.WriteLine("Application exiting", "AppleMagicKeyboardAssistant");
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger.Fatal(ex, "Unhandled error");
+                                    Trace.WriteLine($"Unhandled error: {ex}", "AppleMagicKeyboardAssistant");
                                 }
                             }
                         }
@@ -74,7 +69,7 @@ namespace AppleMagicKeyboardAssistant
             }
             catch (Exception ex)
             {
-                logger.Fatal(ex, "Unhandled error");
+                Trace.WriteLine($"Unhandled error: {ex}", "AppleMagicKeyboardAssistant");
             }
         }
     }

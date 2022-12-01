@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using AppleMagicKeyboardAssistant.Pinvoke;
-using Serilog.Core;
 
 namespace AppleMagicKeyboardAssistant
 {
     public class BrightnessController : IDisposable
     {
-        private readonly Logger _logger;
         private readonly List<PHYSICAL_MONITOR[]> _physicalMonitors = new List<PHYSICAL_MONITOR[]>();
 
-        public BrightnessController(Logger logger)
+        public BrightnessController()
         {
-            _logger = logger;
-            var monitorHandles = new List<IntPtr>();
-            User32.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
-                (IntPtr monitor, IntPtr hdcMonitor, ref RECT rect, IntPtr data) =>
+            var monitorHandles = new List<nint>();
+            User32.EnumDisplayMonitors(nint.Zero, nint.Zero,
+                (nint monitor, nint hdcMonitor, ref RECT rect, nint data) =>
                 {
                     monitorHandles.Add(monitor);
                     return true;
                 },
-                IntPtr.Zero);
+                nint.Zero);
             foreach (var monitorHandle in monitorHandles)
             {
                 uint physicalMonitorsCount = 0;
@@ -43,23 +39,22 @@ namespace AppleMagicKeyboardAssistant
             }
         }
 
-        public void ChangeBritness(int delta)
+        public void ChangeBrightness(int delta)
         {
             foreach (var physicalMonitor in _physicalMonitors)
             foreach (var monitor in physicalMonitor)
             {
-                uint currentBritness = 0;
-                uint minBritness = 0;
-                uint maxBritness = 0;
+                uint currentBrightness = 0;
+                uint minBrightness = 0;
+                uint maxBrightness = 0;
                 Dxva2.GetMonitorBrightness(monitor.hPhysicalMonitor,
-                    ref minBritness, ref currentBritness, ref maxBritness);
-                var newValue = currentBritness + delta;
-                if (newValue < minBritness)
-                    newValue = minBritness;
-                if (newValue > maxBritness)
-                    newValue = maxBritness;
-                _logger.Debug("ChangeBritness {currentBritness}, {minBritness}, {maxBritness}, {newValue}",
-                    currentBritness, maxBritness, maxBritness, newValue);
+                    ref minBrightness, ref currentBrightness, ref maxBrightness);
+                var newValue = currentBrightness + delta;
+                if (newValue < minBrightness)
+                    newValue = minBrightness;
+                if (newValue > maxBrightness)
+                    newValue = maxBrightness;
+                Trace.WriteLine($"ChangeBrightness {currentBrightness}, {minBrightness}, {maxBrightness}, {newValue}", "AppleMagicKeyboardAssistant");
                 Dxva2.SetMonitorBrightness(monitor.hPhysicalMonitor, (uint) newValue);
             }
         }

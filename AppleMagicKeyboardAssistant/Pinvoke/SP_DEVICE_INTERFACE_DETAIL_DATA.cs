@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace AppleMagicKeyboardAssistant.Pinvoke
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
     internal struct SP_DEVICE_INTERFACE_DETAIL_DATA
     {
         public Int32 Size;
