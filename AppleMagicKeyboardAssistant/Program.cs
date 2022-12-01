@@ -17,12 +17,13 @@ namespace AppleMagicKeyboardAssistant
                 {
                     var overlapped = default(NativeOverlapped);
                     var buffer = Marshal.AllocHGlobal(device.BufferSize);
-                    var result = Kernel32.ReadFile((void*)device.Handle, (void*)buffer, 0, null, ref overlapped);
-                    report.AppendLine(device.ToString());
+                    var result = Kernel32.ReadFile((void*)device.Handle, (void*)buffer, (uint)device.BufferSize, null, ref overlapped);
+                    report.AppendLine($"{device}\n\tRead result: {result}");
                     device.Dispose();
                 }
                 MessageBox.Show(report.ToString(), "Diagnostics report");
                 Application.Exit();
+                return;
             } 
             try
             {

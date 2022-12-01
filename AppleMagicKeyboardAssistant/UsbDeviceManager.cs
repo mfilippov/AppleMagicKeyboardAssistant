@@ -7,7 +7,7 @@ namespace AppleMagicKeyboardAssistant
     public static class UsbDeviceManager
     {
         private static readonly List<ushort> AppleVendorList = new() { 0x05ac, 0x046d };
-        private static readonly List<ushort> AppleProductList = new() { 0x23a, 0xc31c, 0x0267 };
+        private static readonly List<ushort> AppleProductList = new() { 0x23a, 0x29a, 0xc31c, 0x0267, 0xc547 };
         
         public static List<AppleDevice> EnumerateAppleDevices()
         {
@@ -23,17 +23,17 @@ namespace AppleMagicKeyboardAssistant
             {
                 uint nRequiredSize = 0;
                 var spDeviceInterfaceDetailData = new SP_DEVICE_INTERFACE_DETAIL_DATA();
-                if (IntPtr.Size == 8)
+                if (nint.Size == 8)
                 {
-                    spDeviceInterfaceData.CbSize = 8;
+                    spDeviceInterfaceDetailData.Size = 8;
                 }
                 else
                 {
-                    spDeviceInterfaceData.CbSize = 4 + Marshal.SystemDefaultCharSize;
+                    spDeviceInterfaceDetailData.Size = 4 + Marshal.SystemDefaultCharSize;
                 }
 
                 if (SetupApi.SetupDiGetDeviceInterfaceDetail(hDevInfo, ref spDeviceInterfaceData,
-                        nint.Zero, nRequiredSize, ref nRequiredSize, nint.Zero))
+                        nint.Zero, 0, ref nRequiredSize, nint.Zero))
                 {
                     Trace.WriteLine(Marshal.GetLastPInvokeErrorMessage(), "AppleMagicKeyboardAssistant");
                     continue;

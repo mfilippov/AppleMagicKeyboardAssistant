@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using AppleMagicKeyboardAssistant.Pinvoke;
 
 namespace AppleMagicKeyboardAssistant
@@ -45,9 +44,9 @@ namespace AppleMagicKeyboardAssistant
 
         public override string ToString()
         {
-            return $"{nameof(Handle)}: {Handle}, {nameof(VendorId)}: {VendorId}, " +
-                   $"{nameof(ProcuctId)}: {ProcuctId}, {nameof(DevicePath)}: {DevicePath}, " +
-                   $"{nameof(ProductString)}: {ProductString}, {nameof(BufferSize)}: {BufferSize}";
+            return $"{nameof(Handle)}: {Handle}\n\t{nameof(VendorId)}: {VendorId}\n\t" +
+                   $"{nameof(ProcuctId)}: {ProcuctId}\n\t{nameof(DevicePath)}: {DevicePath}\n\t" +
+                   $"{nameof(ProductString)}: {ProductString}\n\t{nameof(BufferSize)}: {BufferSize}";
         }
     }
 }
